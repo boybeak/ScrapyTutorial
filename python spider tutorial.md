@@ -92,3 +92,5 @@ scrapy startproject tutorial
 
 此时ScrapyTutorial目录下的结构如下图所示:
 
+![https://github.com/boybeak/ScrapyTutorial/blob/master/pic1.jpeg](https://github.com/boybeak/ScrapyTutorial/blob/master/pic1.jpeg)
+
