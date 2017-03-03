@@ -90,3 +90,5 @@ scrapy startproject tutorial
 
 命令执行成功后，在ENV目录下会生成一个tutorial目录，这就是我们的爬虫项目目录了，废了这么大劲，终于到这步了。
 
+此时ScrapyTutorial目录下的结构如下图所示:
+
