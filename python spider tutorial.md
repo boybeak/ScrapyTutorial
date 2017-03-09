@@ -288,7 +288,7 @@ $ scrapy shell 'http://quotes.toscrape.com'
 
 以前的quotes_spider.py中改成这样：
 
-```
+```python
 import scrapy
 
 
@@ -320,4 +320,80 @@ scrapy crawl quotes -o quotes.json
 
 ## 学习到这里，可以练手了
 
-以一个盗版网站作为练手对象，http://www.6vhao.net/ 
+以一个盗版网站作为练手对象，http://www.6vhao.net/ ，我们要爬出导航条每个电影分类下每一页的每一个电影的名字，情节，预览图，下载地址等相关信息。
+
+![https://github.com/boybeak/ScrapyTutorial/blob/master/6v.jpeg](https://github.com/boybeak/ScrapyTutorial/blob/master/6v.jpeg)
+
+我们定义一个爬虫类，名为MovieSpider，类内属性名称为movie_spider。将这个几个导航的链接复制下来，放在待爬取的链接数组里。代码如下
+
+```python
+# -*- coding: utf-8 -*-
+
+import scrapy
+
+
+class MovieSpider(scrapy.Spider):
+
+    name = "movie_spider"
+
+    start_urls = [
+        "http://www.6vhao.net/dy1/",
+        "http://www.6vhao.net/dy2/",
+        "http://www.6vhao.net/dy3/",
+        "http://www.6vhao.net/dy5/",
+        "http://www.6vhao.net/dy6/",
+        "http://www.6vhao.net/zzp/",
+        "http://www.6vhao.net/jlp/",
+        "http://www.6vhao.net/jddy/",
+        "http://www.6vhao.net/dy4/",
+        "http://www.6vhao.net/dlz/",
+        "http://www.6vhao.net/rj/",
+        "http://www.6vhao.net/mj/",
+        "http://www.6vhao.net/3d/",
+        "http://www.6vhao.net/zy/"
+    ]
+    custom_settings = {
+        'DOWNLOAD_DELAY': 0.25
+    }
+```
+
+注意其中的第一行代码，指定了本代码文件的编码，因为在python2.7中，默认的代码文件编码是ASCII码，接下来代码中，抓取页码跳转时候侦测的是"下一页"这个中文，所以必须指明文件编码为utf-8。
+
+代码最后设置了一个属性，这个属性作用域是本爬虫。设置属性DOWNLOAD_DELAY的含义是每两次网络请求之间的时间间隔，避免频繁访问网站触发防御机制。
+
+接下来就执行parse方法
+
+```python
+    def parse(self, response):
+		# 在分类下，对该页中的每个电影，进行跳入，再通过parse_movie爬取
+        for href in response.css('div.listBox ul li div.listimg a::attr(href)').extract():
+            try:
+                yield scrapy.Request(response.urljoin(href),
+                                 callback=self.parse_movie)
+            except Exception as e:
+                continue
+		# 指明该字符串编码
+        next_page_str = u'下一页'
+        rex = '//div[@class="pagebox"]/a[contains(text(), "%s")]/@href' % next_page_str
+        next_page = response.xpath(rex).extract_first()
+        # 如果发现了有下一页，则开始爬下一页，如果没有则说明该分类电影已经爬完了，跳到下个分类去爬
+        if next_page is not None:
+            next_page = response.urljoin(next_page)
+            yield scrapy.Request(next_page, callback=self.parse)
+
+    def parse_movie(self, response):
+
+        def extract_with_css_first(query):
+            return response.css(query).extract_first().strip()
+
+        def extract_with_css_array(query):
+            return response.css(query).extract()
+
+        yield {
+            'title': extract_with_css_first('div.contentinfo h1 a::text'),
+            'cover': extract_with_css_first('div#text p img::attr(src)'),
+            'detail': extract_with_css_array('div#text p::text')
+        }
+```
+
+好了，基本的就到这里了，具体的下载链接就不抓了。
