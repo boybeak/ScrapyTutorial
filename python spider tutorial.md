@@ -315,3 +315,9 @@ scrapy crawl quotes -o quotes.json
 ```
 
 将爬到的数据存储到一个json文件下，执行结束后，将看到ENV/tutorial目录下多了一个quotes.json文件。
+
+
+
+## 学习到这里，可以练手了
+
+以一个盗版网站作为练手对象，http://www.6vhao.net/ 
