@@ -1,3 +1,9 @@
+```
+import logging
+import json
+import mysql.connector as Connector
+
+
 class TutorialPipeline(object):
 
     config = {
@@ -19,3 +25,4 @@ class TutorialPipeline(object):
         self.cursor.execute(add_command, add_params)
         self.con.commit()
         return item
+```
